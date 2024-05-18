@@ -56,13 +56,18 @@ public class RoadSpawner : MonoBehaviour
         planes.Add(newPlane);
         Transform collisionWallTransform = newPlane.transform.GetChild(4);
 
+        if (collisionWallTransform != null)
+        {
+            CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
+            collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
+        }
 
         // Eski plane objesini yok et ve listeden çıkar
-        if (planes.Count > maxPlanes)
-        {
-            Destroy(planes[0]);
-            planes.RemoveAt(0);
-        }
+        //if (planes.Count > maxPlanes)
+        //{
+        //    Destroy(planes[0]);
+        //    planes.RemoveAt(0);
+        //}
     }
 
     void RemoveOldPlanes()

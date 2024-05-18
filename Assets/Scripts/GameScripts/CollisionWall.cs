@@ -9,6 +9,7 @@ public class CollisionWall : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log("DEĞDİ");
         if (other.CompareTag("Player"))
         {
             // Player ile çarpışma olduğunda event'i tetikle
