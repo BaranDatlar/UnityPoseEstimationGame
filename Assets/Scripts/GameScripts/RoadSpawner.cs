@@ -5,24 +5,25 @@ using System.Collections;
 
 public class RoadSpawner : MonoBehaviour
 {
-    public GameObject planePrefab; // Prefab olarak kullanılacak plane objesi
+    public GameObject planePrefab; 
     public GameObject collisionWall;
     public GameObject initialPlane;
 
     public Transform roadSpawner;
-    public float spawnInterval = 2f; // Yeni plane objesinin yaratılma süresi2
-    public int maxPlanes = 5; // Aynı anda sahnede bulunacak maksimum plane sayısı
+
+    public float spawnInterval = 2f; 
+    public int maxPlanes = 5; 
     public float destroyDelay = 2f;
 
-    private List<GameObject> planes = new List<GameObject>(); // Yaratılan plane objelerini saklayacak liste
-    private float planeLength; // Plane objesinin uzunluğu
+    private List<GameObject> planes = new List<GameObject>(); 
+    private float planeLength; 
 
-    public UnityEvent onSpawnPlane; // Plane yaratma eventi
+    public UnityEvent onSpawnPlane; 
 
 
     void Start()
     {
-        // Prefab'ın uzunluğunu hesapla
+        
         MeshRenderer renderer = planePrefab.transform.GetChild(0).GetComponent<MeshRenderer>();
         if (renderer != null)
         {
@@ -34,7 +35,6 @@ public class RoadSpawner : MonoBehaviour
         //GameObject initialPlane = Instantiate(planePrefab, Vector3.zero, Quaternion.identity);
         planes.Add(initialPlane);
 
-        // Plane yaratma eventini ayarla ve başlat
         onSpawnPlane = new UnityEvent();
         onSpawnPlane.AddListener(SpawnPlane);
     
@@ -48,10 +48,8 @@ public class RoadSpawner : MonoBehaviour
 
     void SpawnPlane()
     {
-        // Son plane objesinin pozisyonunu al
         Vector3 spawnPosition = planes[planes.Count - 1].transform.position + new Vector3(0, 0, planeLength);
 
-        // Yeni plane objesini yarat ve listeye ekle
         GameObject newPlane = Instantiate(planePrefab, spawnPosition, Quaternion.identity, roadSpawner);
         planes.Add(newPlane);
         Transform collisionWallTransform = newPlane.transform.GetChild(4);
@@ -71,14 +69,12 @@ public class RoadSpawner : MonoBehaviour
     }
 
     void RemoveOldPlanes()
-    {
-        // CollisionWall'dan sonra objeleri yok et
+    {      
         StartCoroutine(DestroyOldPlanesAfterDelay());
     }
 
     IEnumerator DestroyOldPlanesAfterDelay()
     {
-        // Belirtilen süre kadar bekle
         yield return new WaitForSeconds(destroyDelay);
 
         if (planes.Count > 0)
