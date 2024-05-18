@@ -37,8 +37,10 @@ public class RoadSpawner : MonoBehaviour
 
         onSpawnPlane = new UnityEvent();
         onSpawnPlane.AddListener(SpawnPlane);
-    
-        InvokeRepeating(nameof(InvokeSpawnPlane), spawnInterval, spawnInterval);
+        CameraCalibration.instance.onCalibrationFinished.AddListener(() =>
+        {
+            InvokeRepeating(nameof(InvokeSpawnPlane), spawnInterval, spawnInterval);
+        });
     }
 
     void InvokeSpawnPlane()

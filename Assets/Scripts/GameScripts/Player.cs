@@ -11,6 +11,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (!CameraCalibration.instance.calibrationCompleted) return;
+
         MoveCharacter(BodyPartAngles.ReturnMidPointOfShoulders());
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
 
