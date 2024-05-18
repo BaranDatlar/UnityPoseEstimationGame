@@ -19,6 +19,6 @@ public class GetBodyPoints : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    Debug.Log(BodyPartAngles.LeftShoulderAngle().Item1);
+    Debug.Log(BodyPartAngles.ReturnMidPointOfShoulders());
   }
 }

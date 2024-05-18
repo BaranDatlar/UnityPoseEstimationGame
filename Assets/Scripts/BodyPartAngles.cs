@@ -32,6 +32,13 @@ public class BodyPartAngles
     return Vector3.Lerp(pointA, pointB, 0.5f);
   }
 
+
+  public static Vector3 ReturnMidPointOfShoulders()
+    {
+        Vector3 middleOfShoulders = CalculateMidPoint(bodyPoints[11].transform.position, bodyPoints[12].transform.position);
+        return middleOfShoulders;
+    }  
+
   public static (float, int) GetBodyPartAngle(BodyParts bodyParts)
   {
     switch (bodyParts)
