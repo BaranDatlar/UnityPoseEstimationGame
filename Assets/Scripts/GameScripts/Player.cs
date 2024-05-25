@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float speed = 5f;
+    public float speed = 2f;
     public float maxMovementRange = 30f;
     public float lateralSpeed = 5f;
 
@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
 
     public float bendThreshold = 20f; // Eğilme eşik değeri
     public float bendAmount = -5f; // Eğilme miktarı (y ekseninde)
+
+    public Animator animator;
 
 
 
@@ -28,6 +30,10 @@ public class Player : MonoBehaviour
         Vector3 currentPosition = transform.position;
         currentPosition.x = Mathf.Lerp(currentPosition.x, targetPosition.x, Time.deltaTime * lateralSpeed);
         transform.position = currentPosition;
+
+        animator.SetFloat("Speed", speed);
+        animator.SetFloat("Direction", targetPosition.x / maxMovementRange);
+        Debug.Log("DİRECTİON " + targetPosition.x / maxMovementRange);
     }
 
     public void MoveCharacter(Vector3 newCoordinate)
@@ -41,7 +47,7 @@ public class Player : MonoBehaviour
 
     public void BendCharacter(Vector3 newCoordinate)
     {
-        Debug.Log("AVERAGE Y COORDİNATE " + CameraCalibration.instance.averageYCoordinate);
+        //Debug.Log("AVERAGE Y COORDİNATE " + CameraCalibration.instance.averageYCoordinate);
         float bendingYCoordinate = CameraCalibration.instance.averageYCoordinate - bendThreshold;
         Vector3 currentPosition = transform.position;
 
@@ -49,11 +55,13 @@ public class Player : MonoBehaviour
         {
             // Eğilme pozisyonuna ayarla (y ekseninde eğilme)
             currentPosition.y = bendAmount;
+            animator.SetBool("IsCrouching", true);
         }
         else
         {
             // Dik pozisyona ayarla
             currentPosition.y = 0;
+            animator.SetBool("IsCrouching", false);
         }
         transform.position = currentPosition;
     }
