@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class CameraCalibration : MonoBehaviour
 {
     public Button startCalibration;
+    public Button skipCalibration;
     public TextMeshProUGUI countDownText;
     public int countDownValue = 10;
     public float averageYCoordinate;
@@ -33,6 +34,7 @@ public class CameraCalibration : MonoBehaviour
         {
             StartCoroutine(StartCountdown());
         });
+        skipCalibration.onClick.AddListener(SkipCalibration);
     }
 
     IEnumerator StartCountdown()
@@ -69,5 +71,12 @@ public class CameraCalibration : MonoBehaviour
         
         yield return new WaitForSeconds(2);
         countDownText.gameObject.SetActive(false);
+    }
+
+    void SkipCalibration()
+    {
+        calibrationCompleted = true;
+        onCalibrationFinished?.Invoke();
+        StopAllCoroutines();
     }
 }
