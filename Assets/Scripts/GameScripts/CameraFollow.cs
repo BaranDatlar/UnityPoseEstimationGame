@@ -2,17 +2,19 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public Transform player; 
+    public Transform player;
     public Vector3 offset;
-    public Vector3 initialPos;
-    public Vector3 targetOffset;
+    public float zoomInDistance = 2.0f; // Kameranın yaklaşacağı mesafe
+    public float zoomSpeed = 5.0f; // Yaklaşma ve uzaklaşma hızı
 
     public static CameraFollow instance { get; private set; }
-    private bool _isCameraZoomIn;
+    private Vector3 _originalOffset;
+    private Vector3 _currentOffset;
+    private bool _isZoomingIn = false;
+    private bool _isZoomingOut = false;
 
     private void Awake()
     {
-
         if (instance != null && instance != this)
         {
             Destroy(this);
@@ -22,30 +24,46 @@ public class CameraFollow : MonoBehaviour
         instance = this;
     }
 
+    private void Start()
+    {
+        _originalOffset = offset = transform.position - player.position;
+        _currentOffset = offset;
+    }
+
+    private void LateUpdate()
+    {
+        if (_isZoomingIn)
+        {
+            _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance, Time.deltaTime * zoomSpeed);
+            if (Vector3.Distance(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance) < 0.1f)
+            {
+                _currentOffset = _originalOffset - _originalOffset.normalized * zoomInDistance;
+                _isZoomingIn = false;
+            }
+        }
+        else if (_isZoomingOut)
+        {
+            _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset, Time.deltaTime * zoomSpeed);
+            if (Vector3.Distance(_currentOffset, _originalOffset) < 0.1f)
+            {
+                _currentOffset = _originalOffset;
+                _isZoomingOut = false;
+            }
+        }
+
+        transform.position = player.position + _currentOffset;
+        transform.LookAt(player);
+    }
+
     public void CameraZoomIn()
     {
-        _isCameraZoomIn = true;
-        var targetPos = new Vector3(transform.position.x, offset.y - 10, transform.position.z);
-        Vector3.MoveTowards(transform.position, targetPos, 3f * Time.deltaTime);
+        _isZoomingIn = true;
+        _isZoomingOut = false;
     }
 
     public void CameraZoomOut()
     {
-        _isCameraZoomIn = false;
-        Vector3.MoveTowards(transform.position, initialPos, 3f * Time.deltaTime);
-    }
-
-    void Start()
-    {
-        initialPos = transform.position;
-        offset = transform.position - player.position;
-        targetOffset = new Vector3(offset.x, offset.y, offset.z + 0.1f);
-    }
-
-    void LateUpdate()
-    {
-        if (_isCameraZoomIn) transform.position = player.position + targetOffset;
-        else transform.position = player.position + offset;
-        transform.LookAt(player);
+        _isZoomingOut = true;
+        _isZoomingIn = false;
     }
 }
