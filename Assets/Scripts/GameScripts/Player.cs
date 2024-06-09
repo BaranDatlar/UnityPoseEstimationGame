@@ -120,12 +120,14 @@ public class Player : MonoBehaviour
         if (newCoordinate.y < bendingYCoordinate)
         {
             // Eğilme pozisyonuna ayarla (y ekseninde eğilme)
+            CameraFollow.instance.CameraZoomIn();
             currentPosition.y = bendAmount;
             animator.SetBool("IsCrouching", true);
         }
         else
         {
             // Dik pozisyona ayarla
+            CameraFollow.instance.CameraZoomOut();
             currentPosition.y = 0;
             animator.SetBool("IsCrouching", false);
         }

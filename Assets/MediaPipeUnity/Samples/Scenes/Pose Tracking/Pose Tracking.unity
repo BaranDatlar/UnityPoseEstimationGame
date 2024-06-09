@@ -3977,6 +3977,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 267012822}
   offset: {x: 0, y: 0, z: 0}
+  approachSpeed: 3
+  approachDistance: 0.5
 --- !u!81 &1945899336
 AudioListener:
   m_ObjectHideFlags: 0
