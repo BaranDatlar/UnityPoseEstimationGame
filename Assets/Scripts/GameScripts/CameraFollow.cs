@@ -35,7 +35,7 @@ public class CameraFollow : MonoBehaviour
         if (_isZoomingIn)
         {
             _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance, Time.deltaTime * zoomSpeed);
-            if (Vector3.Distance(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance) < 0.1f)
+            if (Vector3.Distance(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance) < 0.05f)
             {
                 _currentOffset = _originalOffset - _originalOffset.normalized * zoomInDistance;
                 _isZoomingIn = false;
@@ -44,7 +44,7 @@ public class CameraFollow : MonoBehaviour
         else if (_isZoomingOut)
         {
             _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset, Time.deltaTime * zoomSpeed);
-            if (Vector3.Distance(_currentOffset, _originalOffset) < 0.1f)
+            if (Vector3.Distance(_currentOffset, _originalOffset) < 0.05f)
             {
                 _currentOffset = _originalOffset;
                 _isZoomingOut = false;

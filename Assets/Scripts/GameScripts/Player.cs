@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Player : MonoBehaviour
 {
@@ -25,7 +26,16 @@ public class Player : MonoBehaviour
     private bool goStraight;
     private bool goRight;
     private bool goLeft;
+    private bool isCrouch;
 
+    public delegate void OnPLayerCrouch(float positionY);
+    public static event OnPLayerCrouch OnPLayerCrouchEvent;
+    public static void InvokeOnPLayerCrouch(float positionY) { OnPLayerCrouchEvent?.Invoke(positionY); }
+
+    private void Start()
+    {
+        OnPLayerCrouchEvent += ResetCharacterBend;
+    }
 
     void Update()
     {
@@ -83,10 +93,19 @@ public class Player : MonoBehaviour
             }
             else
             {
-                // Düz gidiyor
-                goRight = false;
-                goLeft = false;
-                goStraight = true;
+                if (isCrouch)
+                {
+                    goRight = false;
+                    goLeft = false;
+                    goStraight = false;
+                }
+                else
+                {
+                    goRight = false;
+                    goLeft = false;
+                    goStraight = true;
+                }
+                
                 //Debug.Log("Obje düz gidiyor");
             }
         }
@@ -115,22 +134,35 @@ public class Player : MonoBehaviour
         //Debug.Log("AVERAGE Y COORDİNATE " + CameraCalibration.instance.averageYCoordinate);
         float bendingYCoordinate = CameraCalibration.instance.averageYCoordinate - bendThreshold;
         Vector3 currentPosition = transform.position;
-        Debug.Log("CURRENT Y " + newCoordinate.y);
-        Debug.Log("bendingYCoordinate Y " + bendingYCoordinate);
+
         if (newCoordinate.y < bendingYCoordinate)
         {
             // Eğilme pozisyonuna ayarla (y ekseninde eğilme)
-            CameraFollow.instance.CameraZoomIn();
+            isCrouch = true;
+            //CameraFollow.instance.CameraZoomIn();
             currentPosition.y = bendAmount;
             animator.SetBool("IsCrouching", true);
+            InvokeOnPLayerCrouch(currentPosition.y);
         }
         else
         {
             // Dik pozisyona ayarla
-            CameraFollow.instance.CameraZoomOut();
+            isCrouch = false;
+            //CameraFollow.instance.CameraZoomOut();
             currentPosition.y = 0;
             animator.SetBool("IsCrouching", false);
         }
         transform.position = currentPosition;
+    }
+     
+    private void ResetCharacterBend(float currentPosition)
+    {
+        Timer.instance.SetTimer(5f, () =>
+        {
+            //animator.SetBool("GoStraight", true);
+            //CameraFollow.instance.CameraZoomOut();
+            //currentPosition = 0;
+            Debug.Log("5 saniye geçti");
+        });
     }
 }
