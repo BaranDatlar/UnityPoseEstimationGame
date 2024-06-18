@@ -3,15 +3,9 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     public Transform player;
-    public Vector3 offset;
-    public float zoomInDistance = 2.0f; // Kameranın yaklaşacağı mesafe
-    public float zoomSpeed = 5.0f; // Yaklaşma ve uzaklaşma hızı
+    private Vector3 _currentOffset;
 
     public static CameraFollow instance { get; private set; }
-    private Vector3 _originalOffset;
-    private Vector3 _currentOffset;
-    private bool _isZoomingIn = false;
-    private bool _isZoomingOut = false;
 
     private void Awake()
     {
@@ -26,44 +20,13 @@ public class CameraFollow : MonoBehaviour
 
     private void Start()
     {
-        _originalOffset = offset = transform.position - player.position;
-        _currentOffset = offset;
+        _currentOffset = transform.position - player.position;
     }
 
     private void LateUpdate()
     {
-        if (_isZoomingIn)
-        {
-            _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance, Time.deltaTime * zoomSpeed);
-            if (Vector3.Distance(_currentOffset, _originalOffset - _originalOffset.normalized * zoomInDistance) < 0.05f)
-            {
-                _currentOffset = _originalOffset - _originalOffset.normalized * zoomInDistance;
-                _isZoomingIn = false;
-            }
-        }
-        else if (_isZoomingOut)
-        {
-            _currentOffset = Vector3.Lerp(_currentOffset, _originalOffset, Time.deltaTime * zoomSpeed);
-            if (Vector3.Distance(_currentOffset, _originalOffset) < 0.05f)
-            {
-                _currentOffset = _originalOffset;
-                _isZoomingOut = false;
-            }
-        }
-
         transform.position = player.position + _currentOffset;
         transform.LookAt(player);
     }
 
-    public void CameraZoomIn()
-    {
-        _isZoomingIn = true;
-        _isZoomingOut = false;
-    }
-
-    public void CameraZoomOut()
-    {
-        _isZoomingOut = true;
-        _isZoomingIn = false;
-    }
 }
