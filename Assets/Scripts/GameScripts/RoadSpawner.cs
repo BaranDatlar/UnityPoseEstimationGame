@@ -7,15 +7,14 @@ public class RoadSpawner : MonoBehaviour
 {
     public GameObject planePrefab; 
     public GameObject collisionWall;
-    public GameObject initialPlane;
 
     public Transform roadSpawner;
 
     public float spawnInterval = 2f; 
     public int maxPlanes = 5; 
-    public float destroyDelay = 2f;
+    public float destroyDelay = 0;
 
-    private List<GameObject> planes = new List<GameObject>(); 
+    public List<GameObject> planes = new List<GameObject>(); 
     private float planeLength; 
 
     public UnityEvent onSpawnPlane; 
@@ -23,24 +22,32 @@ public class RoadSpawner : MonoBehaviour
 
     void Start()
     {
-        
+        Debug.Log("PLANES START COUNT " + planes.Count);
         MeshRenderer renderer = planePrefab.transform.GetChild(0).GetComponent<MeshRenderer>();
         if (renderer != null)
         {
             planeLength = renderer.bounds.size.z; // Plane'in Z ekseni boyunca uzunluğunu al
         }
-        Debug.Log("PLANE LENGTH" + planeLength);
-
-        // İlk plane objesini yarat ve listeye ekle
-        //GameObject initialPlane = Instantiate(planePrefab, Vector3.zero, Quaternion.identity);
-        planes.Add(initialPlane);
 
         onSpawnPlane = new UnityEvent();
         onSpawnPlane.AddListener(SpawnPlane);
+
         CameraCalibration.instance.onCalibrationFinished.AddListener(() =>
         {
-            InvokeRepeating(nameof(InvokeSpawnPlane), spawnInterval, spawnInterval);
+            InvokeSpawnPlane();
         });
+
+        Transform collisionWallTransform = planes[2].transform.GetChild(4);
+
+        if (collisionWallTransform != null)
+        {
+            CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
+            collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
+        }
+        else
+        {
+            Debug.Log("collision null");
+        }
     }
 
     void InvokeSpawnPlane()
@@ -50,6 +57,7 @@ public class RoadSpawner : MonoBehaviour
 
     void SpawnPlane()
     {
+        Debug.Log("PLANES COUNT " + planes.Count);
         Vector3 spawnPosition = planes[planes.Count - 1].transform.position + new Vector3(0, 0, planeLength);
 
         GameObject newPlane = Instantiate(planePrefab, spawnPosition, Quaternion.identity, roadSpawner);
@@ -61,13 +69,6 @@ public class RoadSpawner : MonoBehaviour
             CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
             collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
         }
-
-        // Eski plane objesini yok et ve listeden çıkar
-        //if (planes.Count > maxPlanes)
-        //{
-        //    Destroy(planes[0]);
-        //    planes.RemoveAt(0);
-        //}
     }
 
     void RemoveOldPlanes()
@@ -84,5 +85,6 @@ public class RoadSpawner : MonoBehaviour
             Destroy(planes[0]);
             planes.RemoveAt(0);
         }
+        InvokeSpawnPlane();
     }
 }
