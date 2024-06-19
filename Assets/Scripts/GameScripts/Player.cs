@@ -1,8 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class Player : MonoBehaviour
 {
@@ -11,6 +10,7 @@ public class Player : MonoBehaviour
     public float lateralSpeed = 5f;
 
     private Vector3 targetPosition;
+    private Rigidbody rb;
 
     public float bendThreshold = 20f; // Eğilme eşik değeri
     public float bendAmount = -5f; // Eğilme miktarı (y ekseninde)
@@ -23,18 +23,41 @@ public class Player : MonoBehaviour
 
     public Animator animator;
 
+    private Material playerMaterial;
+    private Color originalColor;
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+    private bool isImmortal = false;
+    public float immortalityDuration = 8f; // Ölümsüzlük süresi
+    public float blinkInterval = 0.1f; // Yanıp sönme aralığı
+
     private bool goStraight;
     private bool goRight;
     private bool goLeft;
     private bool isCrouch;
-
-    public delegate void OnPLayerCrouch(float positionY);
-    public static event OnPLayerCrouch OnPLayerCrouchEvent;
-    public static void InvokeOnPLayerCrouch(float positionY) { OnPLayerCrouchEvent?.Invoke(positionY); }
+    private bool isCrashRock;
 
     private void Start()
     {
-        OnPLayerCrouchEvent += ResetCharacterBend;
+        rb = GetComponent<Rigidbody>();
+        skinnedMeshRenderer = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
+        if (skinnedMeshRenderer != null)
+        {
+            playerMaterial = skinnedMeshRenderer.material;
+            originalColor = playerMaterial.color;
+            SetMaterialTransparent(playerMaterial);
+        }
+    }
+
+    private void SetMaterialTransparent(Material material)
+    {
+        material.SetFloat("_Mode", 2);
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        material.SetInt("_ZWrite", 0);
+        material.DisableKeyword("_ALPHATEST_ON");
+        material.EnableKeyword("_ALPHABLEND_ON");
+        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
     }
 
     void Update()
@@ -49,16 +72,13 @@ public class Player : MonoBehaviour
             positionHistory.Dequeue();
         }
 
-
         MoveCharacter(BodyPartAngles.ReturnMidPointOfShoulders());
         BendCharacter(BodyPartAngles.ReturnMidPointOfShoulders());
 
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
-
         // X eksenindeki hedef pozisyona doğru yumuşak geçiş
-        Vector3 currentPosition = transform.position;
+        Vector3 currentPosition = rb.position;
         currentPosition.x = Mathf.Lerp(currentPosition.x, targetPosition.x, Time.deltaTime * lateralSpeed);
-        transform.position = currentPosition;
+        rb.MovePosition(currentPosition + Vector3.forward * speed * Time.deltaTime);
 
         if (positionHistory.Count == windowSize)
         {
@@ -76,19 +96,15 @@ public class Player : MonoBehaviour
             {
                 if (averageChange > 0)
                 {
-                    // Sağa dönüyor
                     goRight = true;
                     goLeft = false;
-                    goStraight= false;
-                    //Debug.Log("Obje sağa dönüyor");
+                    goStraight = false;
                 }
                 else
                 {
-                    // Sola dönüyor
                     goRight = false;
                     goLeft = true;
                     goStraight = false;
-                    //Debug.Log("Obje sola dönüyor");
                 }
             }
             else
@@ -105,64 +121,87 @@ public class Player : MonoBehaviour
                     goLeft = false;
                     goStraight = true;
                 }
-                
-                //Debug.Log("Obje düz gidiyor");
             }
         }
 
-
-        //animator.SetFloat("Direction", targetPosition.x / maxMovementRange);
         animator.SetFloat("Speed", speed);
         animator.SetBool("GoRight", goRight);
         animator.SetBool("GoLeft", goLeft);
         animator.SetBool("GoStraight", goStraight);
-
-        //Debug.Log("DİRECTİON " + targetPosition.x / maxMovementRange);
     }
 
     public void MoveCharacter(Vector3 newCoordinate)
     {
-        // X eksenindeki koordinata göre hedef pozisyonu hesapla
         float xMovement = Mathf.Clamp(newCoordinate.x, -maxMovementRange, maxMovementRange);
-
-        // Yeni hedef pozisyonu ayarla
-        targetPosition = new Vector3(xMovement, transform.position.y, transform.position.z);
+        targetPosition = new Vector3(xMovement, rb.position.y, rb.position.z);
     }
 
     public void BendCharacter(Vector3 newCoordinate)
     {
-        //Debug.Log("AVERAGE Y COORDİNATE " + CameraCalibration.instance.averageYCoordinate);
         float bendingYCoordinate = CameraCalibration.instance.averageYCoordinate - bendThreshold;
-        Vector3 currentPosition = transform.position;
+        Vector3 currentPosition = rb.position;
 
         if (newCoordinate.y < bendingYCoordinate)
         {
-            // Eğilme pozisyonuna ayarla (y ekseninde eğilme)
             isCrouch = true;
-            //CameraFollow.instance.CameraZoomIn();
             currentPosition.y = bendAmount;
             animator.SetBool("IsCrouching", true);
-            InvokeOnPLayerCrouch(currentPosition.y);
         }
         else
         {
-            // Dik pozisyona ayarla
             isCrouch = false;
-            //CameraFollow.instance.CameraZoomOut();
             currentPosition.y = 0;
             animator.SetBool("IsCrouching", false);
         }
-        transform.position = currentPosition;
+        rb.MovePosition(currentPosition);
     }
-     
-    private void ResetCharacterBend(float currentPosition)
+
+    private IEnumerator ProtectCharacterAfterCrash()
     {
-        Timer.instance.SetTimer(5f, () =>
+        isImmortal = true;
+        float elapsedTime = 0f;
+
+        rb.isKinematic = false;
+        isCrashRock = false;
+        speed = 20f;
+        animator.SetBool("IsCrash", false);
+
+        Debug.Log("Protect girdi");
+
+        while (elapsedTime < immortalityDuration)
         {
-            //animator.SetBool("GoStraight", true);
-            //CameraFollow.instance.CameraZoomOut();
-            //currentPosition = 0;
-            Debug.Log("5 saniye geçti");
-        });
+            float lerp = Mathf.PingPong(Time.time, blinkInterval) / blinkInterval;
+            Color color = originalColor;
+            color.a = Mathf.Lerp(0.2f, 1f, lerp); // Alpha değeri 0.2 ile 1 arasında değişsin
+            playerMaterial.color = color;
+
+            yield return null;
+            elapsedTime += Time.deltaTime;
+        }
+
+        playerMaterial.color = originalColor; // Orijinal rengi geri getir
+        isImmortal = false;
+        Debug.Log("Protect çıktı");
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("rock"))
+        {
+            if (!isImmortal)
+            {
+                rb.isKinematic = true;
+                animator.SetBool("IsCrash", true);
+                speed = 0f;
+            }
+
+            isCrashRock = true;           
+            animator.SetFloat("Speed", speed);
+            Debug.Log("Engele çarptı ve durdu!");
+            Timer.instance.SetTimer(3f, () =>
+            {
+                StartCoroutine(ProtectCharacterAfterCrash());
+            });
+        }
     }
 }
