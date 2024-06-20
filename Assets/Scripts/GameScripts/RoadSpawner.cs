@@ -5,16 +5,15 @@ using System.Collections;
 
 public class RoadSpawner : MonoBehaviour
 {
-    public GameObject planePrefab; 
-    public GameObject collisionWall;
-
     public Transform roadSpawner;
 
     public float spawnInterval = 2f; 
     public int maxPlanes = 5; 
     public float destroyDelay = 0;
 
-    public List<GameObject> planes = new List<GameObject>(); 
+    public List<GameObject> randomPlanePrefabList = new List<GameObject>();
+    public List<GameObject> planes = new List<GameObject>();
+
     private float planeLength; 
 
     public UnityEvent onSpawnPlane; 
@@ -23,7 +22,7 @@ public class RoadSpawner : MonoBehaviour
     void Start()
     {
         Debug.Log("PLANES START COUNT " + planes.Count);
-        MeshRenderer renderer = planePrefab.transform.GetChild(0).GetComponent<MeshRenderer>();
+        MeshRenderer renderer = planes[0].transform.GetChild(0).GetComponent<MeshRenderer>();
         if (renderer != null)
         {
             planeLength = renderer.bounds.size.z; // Plane'in Z ekseni boyunca uzunluğunu al
@@ -59,8 +58,8 @@ public class RoadSpawner : MonoBehaviour
     {
         Debug.Log("PLANES COUNT " + planes.Count);
         Vector3 spawnPosition = planes[planes.Count - 1].transform.position + new Vector3(0, 0, planeLength);
-
-        GameObject newPlane = Instantiate(planePrefab, spawnPosition, Quaternion.identity, roadSpawner);
+        var randomPlanePrefab = ChooseRandomPrefab(randomPlanePrefabList);
+        GameObject newPlane = Instantiate(randomPlanePrefab, spawnPosition, Quaternion.identity, roadSpawner);
         planes.Add(newPlane);
         Transform collisionWallTransform = newPlane.transform.GetChild(4);
 
@@ -69,6 +68,12 @@ public class RoadSpawner : MonoBehaviour
             CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
             collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
         }
+    }
+
+    GameObject ChooseRandomPrefab(List<GameObject> planePrefab)
+    {
+        int randomPlaneIndex = Random.Range(0, planePrefab.Count);
+        return planePrefab[randomPlaneIndex];
     }
 
     void RemoveOldPlanes()

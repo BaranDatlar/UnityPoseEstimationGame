@@ -1,12 +1,11 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float speed = 20f;
-    public float maxMovementRange = 30f;
+    public float speed = 150f;
+    public float maxMovementRange = 70f;
     public float lateralSpeed = 5f;
 
     private Vector3 targetPosition;
@@ -168,7 +167,7 @@ public class Player : MonoBehaviour
 
         rb.isKinematic = false;
         isCrashRock = false;
-        speed = 20f;
+        speed = 150f;
         animator.SetBool("IsCrash", false);
 
         Debug.Log("Protect girdi");
