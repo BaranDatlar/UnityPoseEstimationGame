@@ -36,9 +36,12 @@ public class Player : MonoBehaviour
     private bool isCrouch;
     private bool isCrashRock;
 
+    public BoxCollider playerHitbox;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        playerHitbox = GetComponent<BoxCollider>();
         skinnedMeshRenderer = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
         if (skinnedMeshRenderer != null)
         {
@@ -145,12 +148,14 @@ public class Player : MonoBehaviour
         {
             isCrouch = true;
             currentPosition.y = bendAmount;
+            playerHitbox.size = new Vector3(0.76f, 0.9f, 1.18f);
             animator.SetBool("IsCrouching", true);
         }
         else
         {
             isCrouch = false;
             currentPosition.y = 0;
+            playerHitbox.size = new Vector3(0.76f, 1.8f, 1.18f);
             animator.SetBool("IsCrouching", false);
         }
         rb.MovePosition(currentPosition);
