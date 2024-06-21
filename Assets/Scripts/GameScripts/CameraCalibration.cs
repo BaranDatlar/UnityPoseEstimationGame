@@ -39,6 +39,7 @@ public class CameraCalibration : MonoBehaviour
 
     IEnumerator StartCountdown()
     {
+        countDownText.gameObject.SetActive(true);
         List<float> YCoordinates = new();
         float totalYCoordinates = 0;
 

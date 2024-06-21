@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     private bool goLeft;
     private bool isCrouch;
     private bool isCrashRock;
+    
 
     public BoxCollider playerHitbox;
 
@@ -65,6 +66,8 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (!CameraCalibration.instance.calibrationCompleted) return;
+
+        animator.SetBool("IsGameStart", CameraCalibration.instance.calibrationCompleted);
 
         currentX = transform.position.x;
 
