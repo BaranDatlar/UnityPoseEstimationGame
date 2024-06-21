@@ -43,6 +43,7 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerHitbox = GetComponent<BoxCollider>();
         skinnedMeshRenderer = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
+
         if (skinnedMeshRenderer != null)
         {
             playerMaterial = skinnedMeshRenderer.material;

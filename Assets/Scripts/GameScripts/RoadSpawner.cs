@@ -36,17 +36,24 @@ public class RoadSpawner : MonoBehaviour
             InvokeSpawnPlane();
         });
 
-        Transform collisionWallTransform = planes[2].transform.GetChild(4);
+        
 
-        if (collisionWallTransform != null)
+        for (int i = 2; i <= 4; i++)
         {
-            CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
-            collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
+            Transform collisionWallTransform = planes[i].transform.GetChild(4);
+
+            if (collisionWallTransform != null)
+            {
+                CollisionWall collisionWall = collisionWallTransform.gameObject.GetComponent<CollisionWall>();
+                collisionWall.onPlayerCollision.AddListener(RemoveOldPlanes);
+            }
+            else
+            {
+                Debug.Log("collision null");
+            }
         }
-        else
-        {
-            Debug.Log("collision null");
-        }
+
+        
     }
 
     void InvokeSpawnPlane()
