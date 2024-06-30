@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float speed = 150f;
+    public float speed = 30f;
     public float maxMovementRange = 70f;
     public float lateralSpeed = 5f;
 
@@ -171,7 +171,7 @@ public class Player : MonoBehaviour
 
         rb.isKinematic = false;
         isCrashRock = false;
-        speed = 150f;
+        speed = 30f;
         animator.SetBool("IsCrash", false);
 
         Debug.Log("Protect girdi");

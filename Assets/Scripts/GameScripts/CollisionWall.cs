@@ -10,7 +10,7 @@ public class CollisionWall : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             onPlayerCollision.Invoke();
-            Debug.Log("DEĞDİ");
+            Score.instance.IncreaseScore();
         }
     }
 }
