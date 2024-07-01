@@ -1132,7 +1132,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f58b33cd5db7a4e43821b67e3d0a0d16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
+  speed: 70
+  initialSpeed: 0
   maxMovementRange: 70
   lateralSpeed: 5
   bendThreshold: 20
@@ -5725,6 +5726,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 150
+  initialSpeed: 0
   maxMovementRange: 20
   lateralSpeed: 5
   bendThreshold: 20

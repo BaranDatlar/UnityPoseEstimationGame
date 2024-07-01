@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float speed = 30f;
+    public float speed;
+    public float initialSpeed;
     public float maxMovementRange = 70f;
     public float lateralSpeed = 5f;
 
@@ -25,8 +26,9 @@ public class Player : MonoBehaviour
     private Material playerMaterial;
     private Color originalColor;
     private SkinnedMeshRenderer skinnedMeshRenderer;
+
     private bool isImmortal = false;
-    public float immortalityDuration = 8f; // Ölümsüzlük süresi
+    public float immortalityDuration = 5f; // Ölümsüzlük süresi
     public float blinkInterval = 0.1f; // Yanıp sönme aralığı
 
     private bool goStraight;
@@ -43,6 +45,7 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerHitbox = GetComponent<BoxCollider>();
         skinnedMeshRenderer = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
+        initialSpeed = speed;
 
         if (skinnedMeshRenderer != null)
         {
@@ -166,13 +169,13 @@ public class Player : MonoBehaviour
 
     private IEnumerator ProtectCharacterAfterCrash()
     {
+
         isImmortal = true;
         float elapsedTime = 0f;
-
         rb.isKinematic = false;
         isCrashRock = false;
-        speed = 30f;
         animator.SetBool("IsCrash", false);
+        speed = initialSpeed;
 
         Debug.Log("Protect girdi");
 
